@@ -1,0 +1,173 @@
+/*
+--- README ----
+Data used in "SQL Join Explained" from the SQL Tutorial Series,
+by socratica (https://www.youtube.com/channel/UCW6TXMZ5Pq6yL6_k5NZ2e0Q).
+
+Videos here: 
+https://www.youtube.com/watch?v=9yeOJ0ZMUYw
+https://www.youtube.com/watch?v=Jh_pvk48jHA
+
+Since I'm working with the command line interface for postgres 
+(psql), I'm assuming you do the same.
+
+So first of all, create a database named "martiandb" and connect to
+it. After that, you can execute this script to create the relevant
+tables and populate the data. So, fire up psql and at the psql 
+prompt type the following:
+
+CREATE DATABASE martiandb;
+\c martiandb
+\ir martian.sql
+
+\c and \ir are special commands used in psql (check \? for reference).
+\c connects to the db, \ir executes a SQL script with a relative 
+path: make sure you are executing psql in the same folder of the
+script.
+ */
+
+-- TABLES USED
+CREATE TABLE base (
+	base_id SERIAL PRIMARY KEY,
+	base_name VARCHAR(100),
+	founded TIMESTAMP
+);
+
+CREATE TABLE martian (
+	martian_id SERIAL PRIMARY KEY,
+	first_name VARCHAR(100),
+	last_name VARCHAR(100),
+	base_id INT REFERENCES base(base_id),
+	super_id INT
+);
+
+CREATE TABLE visitor (
+	visitor_id SERIAL PRIMARY KEY,
+	host_id INT REFERENCES martian(martian_id),
+	first_name VARCHAR(100),
+	last_name VARCHAR(100)
+);
+
+CREATE TABLE supply (
+	supply_id SERIAL PRIMARY KEY,
+	name VARCHAR(100),
+	description VARCHAR(200),
+	quantity INT
+);
+
+CREATE TABLE inventory (
+	base_id INT REFERENCES base(base_id),
+	supply_id INT REFERENCES supply(supply_id),
+	quantity INT,
+	PRIMARY KEY(base_id, supply_id)
+);
+
+--DATA
+INSERT INTO base
+	(base_name, founded)
+VALUES
+	('Tharsisland', '2037-06-03'),
+	('Valles Marineris 2.0', '2040-12-01'),
+	('Gale Cratertown', '2041-08-15'),
+	('New New New York', '2042-02-10'),
+	('Olympus Mons Spa & Casino', NULL);
+
+INSERT INTO martian
+	(first_name, last_name, base_id, super_id)
+VALUES
+	('Ray', 'Bradbury', 1, NULL),
+	('John', 'Black', 4, 10),
+	('Samuel', 'Hinkston', 4, 2),
+	('Jeff', 'Spender', 1, 9),
+	('Sam', 'Parkhill', 2 ,12),
+	('Emma', 'Parkhill', 3, 8),
+	('Melissa', 'Lewis', 1, 1),
+	('Mark', 'Watney', 3, NULL),
+	('Beth', 'Johanssen', 1, 1),
+	('Chris', 'Beck', 4, NULL),
+	('Nathaniel', 'York', 4, 2),
+	('Elon', 'Musk', 2, NULL),
+	('John', 'Carter', NULL, 8);
+
+
+INSERT INTO visitor
+	(host_id, first_name, last_name)
+VALUES
+	(7, 'George', 'Ambrose'),
+	(1, 'Kris', 'Cardenas'),
+	(9, 'Priscilla', 'Lane'),
+	(11, 'Jane', 'Thorton'),
+	(NULL, 'Doug', 'Stavenger'),
+	(NULL, 'Jamie', 'Waterman'),
+	(8, 'Martin', 'Humphries');
+
+INSERT INTO supply
+	(name, description, quantity)
+VALUES
+('Solar Panel', 'Standard 1x1 meter cell', 912),
+('Water Filter', 'This takes the things out of your water so it''s drinkable',6),
+('Duct Tape', 'A 10 meter roll of duct tape for ALL your repairs', 951),
+('Ketchup', 'It''s ketchup...', 206),
+('Battery Cell', 'Standard 1000 kAh battery cell for power grid (heavy item)', 17),
+('USB 6.0 Cable', 'Carbon fiber coated / 15 TBps spool', 42),
+('Fuzzy Duster', 'It gets dusty around here! Be prepared', 19),
+('Mars Bars', 'The ORIGINAL nutrient bar made with the finest bioengeneered ingrendients', 3801),
+('Air Filter', 'Removes 99% of all Martian dust from your ventilation unit', 23),
+('Famous Ray''s Frozen Pizza ', 'This Martian favorite is covered in all your favorite toppings. 1 flavor only.', 823);
+
+INSERT INTO inventory
+	(base_id, supply_id, quantity)
+VALUES
+	(1, 1, 8),
+	(1, 3, 5),
+	(1, 5, 1),
+	(1, 6, 2),
+	(1, 8, 12),
+	(1, 9, 1),
+	(2, 4, 5),
+	(2, 8, 62),
+	(2, 10, 37),
+	(3, 2, 11),
+	(3, 7, 2),
+	(4, 10, 91);
+
+/*
+The martian_confidential column and its values for VIEW (Socratica), which should have a db of its own with martian_confidential, base, supply, inventory and visitor
+*/
+
+CREATE TABLE martian_confidential (
+  martian_id SERIAL,
+  first_name CHARACTER VARYING,
+  last_name CHARACTER VARYING,
+  base_id INTEGER,
+  super_id INTEGER,
+  salary INTEGER,
+  dna_id CHARACTER VARYING
+);
+
+INSERT INTO martian_confidential (first_name, last_name, base_id, super_id, salary, dna_id) VALUES 
+('Ray', 'Bradbury', 1, null, 15900, 'gctaaagttggcacgactgtacatgggcatgtaccgatatgtacaaccggtgtagcctgg
+cttgcattagatcatgagctcagttatcgcgtttggcgcc'),
+('John', 'Black', 4, 10, 120100, 'gcgggttcaattagcccaatgccgtgtcagggggagatttggatctggatcccttcggcc
+tccggcttgtggataatctagggagtctctgggcgcactc'),
+('Samuel', 'Hinkston', 4, 2, 110000, 'ggcattcagttaaacactctaattcagttgtcctaccagcataagcttgtatggatacaa
+cttgttaagcttttagcgcccgctatctgaaagtgaccaa'),
+('Jeff', 'Spender', 1, 9, 10000, 'cagaatgccgcacatagaccaggtaatcaatccggtttttacgttgcgggtgacatcgta
+ggattgggccctttgcgggattgctccttagtttaccata'),
+('Sam', 'Parkhill', 2, 12, 125000, 'gaaggctccaggccagggtgttcgttccccgcagtcttgtctatgcgatatcgatcactt
+actgtggtgcgctaccgtctaagttctgttgggttggatt'),
+('Elma', 'Parkhill', 3, 8, 137000, 'cgtttgccgactccggtcgaaatctgaggcggccctcctgtaagataacaagggtattga
+ctgccttccggtcgaatgatcaggagagatcaatccctta'),
+('Melissa', 'Lewis', 1, 1, 145250, 'ggataaatcgccacttagaacggcgcagactgcgttagatccattcctcttctctctagc
+tattcccgacacgatccagcctgtgtaatacactaagctg'),
+('Mark', 'Watney', 3, null, 121100, 'cccgatgagtaccccgcaaacgtaagcacattcgagctacgaacacataaattttaacgc
+caattccatatatgtgattgaacaggtgccaggcttcccc'),
+('Beth', 'Johanssen', 1, 1, 130000, 'ataaataacaattgttacttagaggtggtccagaatacgcttgggggtgtccgtcaccca
+ggtcgctccgtggcgttgtaaaatccgctacgcactatac'),
+('Chris', 'Beck', 4, null, 125000, 'gcgattgtgtgttcgaattggtgacaaggtggtatgagtcacgtcggcgtacggcccata
+accgaagtggcggagcccgaccgcgtcgatgggattctca'),
+('Nathaniel', 'York', 4, 2, 105000, 'cgaaacgtgtaaattttatacgggcatgagttgcttcgttgttttccttcgatattatag
+gattacgtgggggataatcattaggtgacgccttatttga'),
+('Elon', 'Musk', 2, null, 155800, 'tcacaaccgcttgagcagactattgttcgcagagcgagggcctgcggttctcaccagcct
+tcttggcctgcatggctcctgaatgattgcgccattctgt'),
+('John', 'Carter', null, 8, 129500, 'ttgatttgcgagcagtcttactggcaactttattatttaggtcctcaggcggttaattgg
+actgctttcaacacctgcagaccccccttctggtctgctg');
