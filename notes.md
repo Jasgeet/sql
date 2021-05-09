@@ -1256,8 +1256,33 @@ UPDATE zoo
 SET age = 14
 WHERE animal = 'elephant';
 ```
-- Update the food_balance to 23 for animals whose age is greater than the average age of the animals
+- Update the food_balance to 23 for animals whose age is greater than the average age of the animals. table = zoo
 ```
+UPDATE zoo
+SET food_balance = 23
+WHERE age > (SELECT AVG(age) FROM zoo);
+```
+
+- You need your customer's names, along with the names of the cities in which they live. The names of the cities are stored in a separate table called "cities". table= customer, cities. Link: city_id in customer and id in cities. Display all cities no matter there's a customer there or not.
+```
+SELECT customers.name, cities.name
+FROM customer
+RIGHT OUTER JOIN cities
+ON customers.city_id = cities.id;
+```
+
+- In the university's table containing student data, the students' last_name have been omitted. Correct this by adding a new column to the table. table- students
+```
+ALTER TABLE students
+ADD last_name varchar(100);
+```
+
+- Retrieve from MIT, Stanford, and Harvard the names(only names) of all students whose first name is Jake. table-students. col- university, name
+```
+SELECT name
+FROM students
+WHERE university IN('MIT', 'Stanford', 'Harvard') 
+AND name = 'Jake';
 ```
 
 ## See
